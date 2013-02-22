@@ -1,5 +1,7 @@
 require "rasper_client/version"
 
 module RasperClient
-  # Your code goes here...
+  autoload :Client, 'rasper_client/client'
+  autoload :FakeServer, 'rasper_client/fake_server'
+  autoload :ConnectionRefusedError, 'rasper_client/errors'
 end
