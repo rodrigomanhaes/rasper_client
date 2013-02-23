@@ -26,8 +26,38 @@ describe RasperClient do
     last['images'].should have(1).image
     image = last['images'][0]
     image['name'].should == 'imagem.jpg'
-    image['content'].should == \
-      Base64.encode64(image_content)
+    image['content'].should == Base64.encode64(image_content)
+  end
+
+  it 'generates report' do
+    pdf_content = @client.generate(
+      report: 'programmers',
+      data: [
+        { name: 'Linus', software: 'Linux' },
+        { name: 'Yukihiro', software: 'Ruby' },
+        { name: 'Guido', software: 'Python' }
+      ],
+      parameters: {
+        'CITY' => 'Campos dos Goytacazes, Rio de Janeiro, Brazil',
+        'DATE' => '02/01/2013'
+      }
+    )
+
+    Base64.encode64(pdf_content).should == \
+      Base64.encode64(File.read(resource('dummy.pdf')))
+    RasperClient::FakeServer.last_generated_report.should == {
+      'report' => 'programmers',
+      'data' => [
+        { 'name' => 'Linus', 'software' => 'Linux' },
+        { 'name' => 'Yukihiro', 'software' => 'Ruby' },
+        { 'name' => 'Guido', 'software' => 'Python' }
+      ],
+      'parameters' => {
+        'CITY' => 'Campos dos Goytacazes, Rio de Janeiro, Brazil',
+        'DATE' => '02/01/2013'
+      }
+    }
+
   end
 
   context 'when cannot connect to server' do

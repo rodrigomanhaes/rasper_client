@@ -5,7 +5,7 @@ require 'base64'
 module RasperClient
   class FakeServer
     class << self
-      attr_accessor :last_added_report
+      attr_accessor :last_added_report, :last_generated_report
     end
 
     def start(port)
@@ -28,7 +28,9 @@ module RasperClient
     end
 
     post '/generate' do
-      { content: "some content" }.to_json
+      content_type :json
+      FakeServer.last_generated_report = JSON.parse(request.body.read)
+      { content: Base64.encode64(File.read(resource('dummy.pdf'))) }.to_json
     end
   end
 end

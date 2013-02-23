@@ -20,12 +20,26 @@ module RasperClient
       raise ConnectionRefusedError
     end
 
+    def generate(options)
+      symbolize_keys(options)
+      response = Net::HTTP.start(@host, @port) do |http|
+        request = Net::HTTP::Post.new(uri_for(:generate))
+        request.body = options.to_json
+        http.request(request)
+      end
+      result = JSON.parse(response.body)
+      Base64.decode64(result['content'])
+    end
+
     private
 
     def symbolize_keys(options)
       symbolize(options, :name)
       symbolize(options, :content)
       symbolize(options, :images)
+      symbolize(options, :report)
+      symbolize(options, :data)
+      symbolize(options, :parameters)
       if options[:images]
         options[:images].each do |image|
           symbolize(image, :name)
