@@ -10,11 +10,7 @@ module RasperClient
     def add(options)
       symbolize_keys(options)
       prepare_options(options)
-      response = Net::HTTP.start(@host, @port) do |http|
-        request = Net::HTTP::Post.new(uri_for(:add))
-        request.body = options.to_json
-        http.request(request)
-      end
+      response = execute_request(:add, options)
       JSON.parse(response.body) == { 'success' => true }
     rescue Errno::ECONNREFUSED
       raise ConnectionRefusedError
@@ -22,16 +18,20 @@ module RasperClient
 
     def generate(options)
       symbolize_keys(options)
-      response = Net::HTTP.start(@host, @port) do |http|
-        request = Net::HTTP::Post.new(uri_for(:generate))
-        request.body = options.to_json
-        http.request(request)
-      end
+      response = execute_request(:generate, options)
       result = JSON.parse(response.body)
       Base64.decode64(result['content'])
     end
 
     private
+
+    def execute_request(action, options)
+      Net::HTTP.start(@host, @port) do |http|
+        request = Net::HTTP::Post.new(uri_for(action))
+        request.body = options.to_json
+        http.request(request)
+      end
+    end
 
     def symbolize_keys(options)
       symbolize(options, :name)
