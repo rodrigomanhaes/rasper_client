@@ -1,5 +1,6 @@
 require 'net/http'
 require 'base64'
+require 'json'
 
 module RasperClient
   class Client
