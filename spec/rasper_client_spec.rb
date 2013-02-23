@@ -31,7 +31,7 @@ describe RasperClient do
 
   it 'generates report' do
     pdf_content = @client.generate(
-      report: 'programmers',
+      name: 'programmers',
       data: [
         { name: 'Linus', software: 'Linux' },
         { name: 'Yukihiro', software: 'Ruby' },
@@ -46,7 +46,7 @@ describe RasperClient do
     Base64.encode64(pdf_content).should == \
       Base64.encode64(File.read(resource('dummy.pdf')))
     RasperClient::FakeServer.last_generated_report.should == {
-      'report' => 'programmers',
+      'name' => 'programmers',
       'data' => [
         { 'name' => 'Linus', 'software' => 'Linux' },
         { 'name' => 'Yukihiro', 'software' => 'Ruby' },
