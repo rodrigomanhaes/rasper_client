@@ -34,12 +34,9 @@ module RasperClient
     end
 
     def symbolize_keys(options)
-      symbolize(options, :name)
-      symbolize(options, :content)
-      symbolize(options, :images)
-      symbolize(options, :report)
-      symbolize(options, :data)
-      symbolize(options, :parameters)
+      %w(name content images report data parameters).each do |s|
+        symbolize(options, s)
+      end
       if options[:images]
         options[:images].each do |image|
           symbolize(image, :name)
