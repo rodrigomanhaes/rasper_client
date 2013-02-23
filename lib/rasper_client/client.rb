@@ -9,7 +9,7 @@ module RasperClient
 
     def add(options)
       symbolize_keys(options)
-      prepare_options(options)
+      encode_options(options)
       response = execute_request(:add, options)
       JSON.parse(response.body) == { 'success' => true }
     rescue Errno::ECONNREFUSED
@@ -35,21 +35,21 @@ module RasperClient
 
     def symbolize_keys(options)
       %w(name content images report data parameters).each do |s|
-        symbolize(options, s)
+        symbolize_key(options, s)
       end
       if options[:images]
         options[:images].each do |image|
-          symbolize(image, :name)
-          symbolize(image, :content)
+          symbolize_key(image, :name)
+          symbolize_key(image, :content)
         end
       end
     end
 
-    def symbolize(hash, key)
+    def symbolize_key(hash, key)
       hash[key.to_sym] = hash.delete(key.to_s) if hash.has_key?(key.to_s)
     end
 
-    def prepare_options(options)
+    def encode_options(options)
       options[:content] = Base64.encode64(options[:content])
       if options[:images]
         options[:images].each do |image|
