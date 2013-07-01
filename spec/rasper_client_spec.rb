@@ -7,9 +7,10 @@ describe RasperClient do
     @server = RasperClient::FakeServer.new.start(@port)
   end
 
+  let(:jrxml_content) { File.read(resource('programmers.jrxml')) }
+  let(:image_content) { File.read(resource('imagem.jpg')) }
+
   it 'adds a report' do
-    jrxml_content = File.read(resource('programmers.jrxml'))
-    image_content = File.read(resource('imagem.jpg'))
     params = {
       name: 'programmers',
       content: jrxml_content,
@@ -23,6 +24,25 @@ describe RasperClient do
     last = RasperClient::FakeServer.last_added_report
     last['name'].should == 'programmers'
     last['content'].should == Base64.encode64(jrxml_content)
+    last['images'].should have(1).image
+    image = last['images'][0]
+    image['name'].should == 'imagem.jpg'
+    image['content'].should == Base64.encode64(image_content)
+  end
+
+  it 'adds only an image' do
+    params = {
+      images: [
+        {
+          name: 'imagem.jpg',
+          content: image_content
+        }
+      ]
+    }
+    @client.add(params).should == true
+    last = RasperClient::FakeServer.last_added_report
+    last['name'].should be_nil
+    last['content'].should be_nil
     last['images'].should have(1).image
     image = last['images'][0]
     image['name'].should == 'imagem.jpg'

@@ -51,7 +51,7 @@ module RasperClient
     end
 
     def encode_options(options)
-      options[:content] = Base64.encode64(options[:content])
+      options[:content] = Base64.encode64(options[:content]) if options[:content]
       if options[:images]
         options[:images].each do |image|
           image[:content] = Base64.encode64(image[:content])
