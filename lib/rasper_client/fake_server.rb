@@ -2,6 +2,8 @@ require 'sinatra/base'
 require 'json'
 require 'base64'
 
+Rack::Utils.key_space_limit = 262144
+
 module RasperClient
   class FakeServer
     class << self
