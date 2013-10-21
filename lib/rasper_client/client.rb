@@ -19,6 +19,7 @@ module RasperClient
 
     def generate(options)
       symbolize_keys(options)
+      options = encode_data(options)
       response = execute_request(:generate, options)
       result = JSON.parse(response.body)
       Base64.decode64(result['content'])
@@ -57,6 +58,10 @@ module RasperClient
           image[:content] = Base64.encode64(image[:content])
         end
       end
+    end
+
+    def encode_data(options)
+      { data: Base64.encode64(options.to_json) }
     end
 
     def uri_for(action)
