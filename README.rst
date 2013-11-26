@@ -37,6 +37,12 @@ file content and, optionally, the images to be embedded in the report::
                { name: 'image2.jpg', content: 'content of image2' }])
 
 
+For avoiding errors related to the request size, ``rasper_client`` supports
+adding images separately::
+
+    client.add(images: [{ name: 'imagem.jpg', content: image_content }])
+
+
 With the report uploaded, it's possible generate PDF reports::
 
     client.generate(name: 'programmers',
