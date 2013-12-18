@@ -11,7 +11,9 @@ module RasperClient
     def add(options)
       symbolize_keys(options)
       encode_options(options)
+
       response = execute_request(:add, options)
+
       JSON.parse(response.body) == { 'success' => true }
     rescue Errno::ECONNREFUSED
       raise ConnectionRefusedError
@@ -65,7 +67,7 @@ module RasperClient
     end
 
     def uri_for(action)
-      "http://#{@host}:#{@port}/#{action}"
+      "http://#{@host}:#{@port}/rasper_server/#{action}"
     end
   end
 end
