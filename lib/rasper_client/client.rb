@@ -5,7 +5,7 @@ require 'json'
 module RasperClient
   class Client
     def initialize(options)
-      @host, @port = options.values_at(:host, :port)
+      @endpoint = options.fetch(:endpoint)
     end
 
     def add(options)
@@ -30,7 +30,8 @@ module RasperClient
     private
 
     def execute_request(action, options)
-      Net::HTTP.start(@host, @port) do |http|
+      uri = URI.parse(@endpoint)
+      Net::HTTP.start(uri.host, uri.port) do |http|
         request = Net::HTTP::Post.new(uri_for(action))
         request.body = options.to_json
         http.request(request)
@@ -67,7 +68,7 @@ module RasperClient
     end
 
     def uri_for(action)
-      "http://#{@host}:#{@port}/rasper_server/#{action}"
+      "#{@endpoint}/#{action}"
     end
   end
 end

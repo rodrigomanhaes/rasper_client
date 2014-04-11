@@ -2,8 +2,9 @@ require 'spec_helper'
 
 describe RasperClient do
   before :all do
-    @port = 7888
-    @client = RasperClient::Client.new(host: 'localhost', port: @port)
+    @endpoint = "http://localhost:3000"
+    @port = 3000
+    @client = RasperClient::Client.new(endpoint: @endpoint)
     @server = RasperClient::FakeServer.new.start(@port)
   end
 
@@ -82,7 +83,7 @@ describe RasperClient do
 
   context 'when cannot connect to server' do
     it 'throws an error' do
-      client = RasperClient::Client.new(host: 'localhost', port: 9876)
+      client = RasperClient::Client.new(endpoint: "http://lvh.me:3001")
       expect { client.add(content: 'thing') }.to raise_error(
         RasperClient::ConnectionRefusedError)
     end
