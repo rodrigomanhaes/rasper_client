@@ -1,4 +1,4 @@
-require 'net/http'
+require 'net/https'
 require 'base64'
 require 'json'
 
@@ -31,7 +31,7 @@ module RasperClient
 
     def execute_request(action, options)
       uri = URI.parse(@endpoint)
-      Net::HTTP.start(uri.host, uri.port) do |http|
+      Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
         request = Net::HTTP::Post.new(uri_for(action))
         request.body = options.to_json
         http.request(request)
