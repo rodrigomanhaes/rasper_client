@@ -5,7 +5,8 @@ require 'json'
 module RasperClient
   class Client
     def initialize(options)
-      @host, @port = options.values_at(:host, :port)
+      @host, @port, @timeout = options.values_at(:host, :port, :timeout)
+      @request_params = build_request_params
     end
 
     def add(options)
@@ -28,11 +29,17 @@ module RasperClient
     private
 
     def execute_request(action, options)
-      Net::HTTP.start(@host, @port) do |http|
+      Net::HTTP.start(*@request_params) do |http|
         request = Net::HTTP::Post.new(uri_for(action))
         request.body = options.to_json
         http.request(request)
       end
+    end
+
+    def build_request_params
+      params = [@host, @port]
+      params << { read_timeout: @timeout } if @timeout
+      params
     end
 
     def symbolize_keys(options)

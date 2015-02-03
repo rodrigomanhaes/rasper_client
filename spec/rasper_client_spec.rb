@@ -87,4 +87,14 @@ describe RasperClient do
         RasperClient::ConnectionRefusedError)
     end
   end
+
+  context 'timeout' do
+    it 'allows pass a timeout to client' do
+      client = RasperClient::Client.new(host: 'localhost', port: @port,
+        timeout: 100)
+      expect(Net::HTTP).to receive(:start).with('localhost', @port,
+        read_timeout: 100).and_return(double(body: '{"success":true}'))
+      client.add(name: 'programmers', content: jrxml_content)
+    end
+  end
 end
