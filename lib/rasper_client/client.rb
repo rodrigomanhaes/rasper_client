@@ -1,6 +1,7 @@
 require 'net/http'
 require 'base64'
 require 'json'
+require 'uri'
 
 module RasperClient
   class Client
@@ -29,10 +30,29 @@ module RasperClient
     private
 
     def execute_request(action, options)
-      Net::HTTP.start(*@request_params) do |http|
-        request = Net::HTTP::Post.new(uri_for(action))
-        request.body = options.to_json
+      if action == :generate
+        boundary = "AaB03x"
+        uri = URI.parse(uri_for(action))
+        post_body = []
+        post_body << "--#{boundary}\r\n"
+        post_body << "Content-Disposition: form-data; name=\"datafile\"; filename=\"data.json\"\r\n"
+        post_body << "Content-Type: application/json\r\n"
+        post_body << "\r\n"
+        post_body << options.to_json
+        post_body << "\r\n--#{boundary}--"
+
+        http = Net::HTTP.new(uri.host, uri.port)
+        request = Net::HTTP::Post.new(uri.request_uri)
+        request.body = post_body.join
+        request["Content-Type"] = "multipart/form-data, boundary=#{boundary}"
+
         http.request(request)
+      else
+        Net::HTTP.start(*@request_params) do |http|
+          request = Net::HTTP::Post.new(uri_for(action))
+          request.body = options.to_json
+          http.request(request)
+        end
       end
     end
 
