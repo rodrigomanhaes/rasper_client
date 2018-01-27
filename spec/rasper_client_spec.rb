@@ -19,18 +19,19 @@ describe RasperClient do
           name: 'imagem.jpg',
           content: image_content
         }
-      ]}
-    @client.add(params).should == true
+      ]
+    }
+    expect(@client.add(params)).to be true
     last = RasperClient::FakeServer.last_added_report
-    last['name'].should == 'programmers'
-    last['content'].should == Base64.encode64(jrxml_content)
-    last['images'].should have(1).image
+    expect(last['name']).to eq 'programmers'
+    expect(last['content']).to eq Base64.encode64(jrxml_content)
+    expect(last['images'].size).to eq 1
     image = last['images'][0]
-    image['name'].should == 'imagem.jpg'
-    image['content'].should == Base64.encode64(image_content)
+    expect(image['name']).to eq 'imagem.jpg'
+    expect(image['content']).to eq Base64.encode64(image_content)
   end
 
-  it 'adds only an image' do
+  it 'adds only one image' do
     params = {
       images: [
         {
@@ -39,14 +40,14 @@ describe RasperClient do
         }
       ]
     }
-    @client.add(params).should == true
+    expect(@client.add(params)).to be true
     last = RasperClient::FakeServer.last_added_report
-    last['name'].should be_nil
-    last['content'].should be_nil
-    last['images'].should have(1).image
+    expect(last['name']).to be_nil
+    expect(last['content']).to be_nil
+    expect(last['images'].size).to eq 1
     image = last['images'][0]
-    image['name'].should == 'imagem.jpg'
-    image['content'].should == Base64.encode64(image_content)
+    expect(image['name']).to eq 'imagem.jpg'
+    expect(image['content']).to eq Base64.encode64(image_content)
   end
 
   it 'generates report' do
@@ -63,9 +64,9 @@ describe RasperClient do
       }
     )
 
-    Base64.encode64(pdf_content).should == \
+    expect(Base64.encode64(pdf_content)).to eq \
       Base64.encode64(File.read(resource('dummy.pdf')))
-    RasperClient::FakeServer.last_generated_report.should == {
+    expect(RasperClient::FakeServer.last_generated_report).to eq \
       'name' => 'programmers',
       'data' => [
         { 'name' => 'Linus', 'software' => 'Linux' },
@@ -76,15 +77,13 @@ describe RasperClient do
         'CITY' => 'Campos dos Goytacazes, Rio de Janeiro, Brazil',
         'DATE' => '02/01/2013'
       }
-    }
-
   end
 
   context 'when cannot connect to server' do
     it 'throws an error' do
       client = RasperClient::Client.new(host: 'localhost', port: 9876)
-      expect { client.add(content: 'thing') }.to raise_error(
-        RasperClient::ConnectionRefusedError)
+      expect { client.add(content: 'thing') }.to \
+        raise_error(RasperClient::ConnectionRefusedError)
     end
   end
 
@@ -92,8 +91,10 @@ describe RasperClient do
     it 'allows pass a timeout to client' do
       client = RasperClient::Client.new(host: 'localhost', port: @port,
         timeout: 100)
-      expect(Net::HTTP).to receive(:start).with('localhost', @port,
-        read_timeout: 100).and_return(double(body: '{"success":true}'))
+      expect(Net::HTTP).to \
+        receive(:start).
+        with('localhost', @port, read_timeout: 100).
+        and_return(double(body: '{"success":true}'))
       client.add(name: 'programmers', content: jrxml_content)
     end
   end
