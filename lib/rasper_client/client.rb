@@ -4,8 +4,11 @@ require 'json'
 
 module RasperClient
   class Client
-    def initialize(options)
-      @host, @port, @timeout = options.values_at(:host, :port, :timeout)
+    def initialize(host:, port:, timeout: nil, empty_nil_values: false)
+      @host = host
+      @port = port
+      @timeout = timeout
+      @empty_nil_values = empty_nil_values
       @request_params = build_request_params
     end
 
@@ -14,12 +17,13 @@ module RasperClient
       encode_options(options)
       response = execute_request(:add, options)
       JSON.parse(response.body) == { 'success' => true }
-    rescue Errno::ECONNREFUSED
+    rescue Errno::ECONNREFUSED, Errno::EADDRNOTAVAIL
       raise ConnectionRefusedError
     end
 
     def generate(options)
       symbolize_keys(options)
+      empty_nil_values(options) if @empty_nil_values
       options = encode_data(options)
       response = execute_request(:generate, options)
       result = JSON.parse(response.body)
@@ -69,6 +73,18 @@ module RasperClient
 
     def encode_data(options)
       { data: Base64.encode64(options.to_json) }
+    end
+
+    def empty_nil_values(hash)
+      hash.each_key do |key|
+        if hash[key].is_a?(Hash)
+          empty_nil_values(hash[key])
+        elsif hash[key].is_a?(Array)
+          hash[key].each {|item| empty_nil_values(item) if item.is_a?(Hash) }
+        else
+          hash[key] = '' if hash[key].nil?
+        end
+      end
     end
 
     def uri_for(action)

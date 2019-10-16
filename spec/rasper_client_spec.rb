@@ -98,4 +98,31 @@ describe RasperClient do
       client.add(name: 'programmers', content: jrxml_content)
     end
   end
+
+  it 'empties all nil values' do
+    client = RasperClient::Client.new(host: 'localhost', port: @port, empty_nil_values: true)
+    client.generate(
+      name: 'programmers',
+      data: [
+        { name: nil, software: nil },
+        { name: nil, software: nil },
+        { name: nil, software: nil }
+      ],
+      parameters: {
+        'CITY' => nil,
+        'DATE' => nil
+      }
+    )
+    expect(RasperClient::FakeServer.last_generated_report).to eq \
+      'name' => 'programmers',
+      'data' => [
+        { 'name' => '', 'software' => '' },
+        { 'name' => '', 'software' => '' },
+        { 'name' => '', 'software' => '' }
+      ],
+      'parameters' => {
+        'CITY' => '',
+        'DATE' => ''
+      }
+  end
 end
