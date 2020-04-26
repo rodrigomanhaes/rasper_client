@@ -4,12 +4,17 @@ require 'json'
 
 module RasperClient
   class Client
-    def initialize(host:, port:, timeout: nil, empty_nil_values: false)
+    def initialize(host:, port: nil, timeout: nil, path_prefix: nil,
+                   secure: true, empty_nil_values: false,
+                   username: nil, password: nil)
       @host = host
       @port = port
       @timeout = timeout
       @empty_nil_values = empty_nil_values
-      @request_params = build_request_params
+      @path_prefix = path_prefix
+      @secure = secure
+      @username = username
+      @password = password
     end
 
     def add(options)
@@ -31,17 +36,21 @@ module RasperClient
     private
 
     def execute_request(action, options)
-      Net::HTTP.start(*@request_params) do |http|
+      response = Net::HTTP.start(*build_request_params) do |http|
         request = Net::HTTP::Post.new(uri_for(action))
         request.body = options.to_json
+        request.basic_auth(@username, @password) if @username && @password
         http.request(request)
       end
+      check_for_errors(response)
+      response
     end
 
     def build_request_params
-      params = [@host, @port]
-      params << { read_timeout: @timeout } if @timeout
-      params
+      options = {}
+      options[:read_timeout] = @timeout if @timeout
+      options[:use_ssl] = true if @secure
+      [@host, @port, options].compact
     end
 
     def symbolize_keys(options)
@@ -57,7 +66,7 @@ module RasperClient
     end
 
     def symbolize_key(hash, key)
-      hash[key.to_sym] = hash.delete(key.to_s) if hash.has_key?(key.to_s)
+      hash[key.to_sym] = hash.delete(key.to_s) if hash.key?(key.to_s)
     end
 
     def encode_options(options)
@@ -86,7 +95,21 @@ module RasperClient
     end
 
     def uri_for(action)
-      "http://#{@host}:#{@port}/#{action}"
+      uri_build_class
+        .build(
+          host: @host,
+          port: @port,
+          path: "#{@path_prefix}/#{action}"
+        )
+        .to_s
+    end
+
+    def uri_build_class
+      @secure ? URI::HTTPS : URI::HTTP
+    end
+
+    def check_for_errors(response)
+      raise RasperClient::Error.invalid_credentials if response.code.to_i == 401
     end
   end
 end
