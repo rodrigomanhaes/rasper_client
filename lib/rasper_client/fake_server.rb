@@ -23,6 +23,8 @@ module RasperClient
   end
 
   class FakeApp < Sinatra::Application
+    set :logging, false
+
     post '/add' do
       content_type :json
       FakeServer.last_added_report = JSON.parse(request.body.read)

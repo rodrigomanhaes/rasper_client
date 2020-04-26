@@ -17,8 +17,6 @@ module RasperClient
       encode_options(options)
       response = execute_request(:add, options)
       JSON.parse(response.body) == { 'success' => true }
-    rescue Errno::ECONNREFUSED, Errno::EADDRNOTAVAIL
-      raise ConnectionRefusedError
     end
 
     def generate(options)

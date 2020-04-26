@@ -79,14 +79,6 @@ describe RasperClient do
       }
   end
 
-  context 'when cannot connect to server' do
-    it 'throws an error' do
-      client = RasperClient::Client.new(host: 'localhost', port: 9876)
-      expect { client.add(content: 'thing') }.to \
-        raise_error(RasperClient::ConnectionRefusedError)
-    end
-  end
-
   context 'timeout' do
     it 'allows pass a timeout to client' do
       client = RasperClient::Client.new(host: 'localhost', port: @port,
