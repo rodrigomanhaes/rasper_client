@@ -37,7 +37,7 @@ module RasperClient
 
     def execute_request(action, options)
       response = Net::HTTP.start(*build_request_params) do |http|
-        request = Net::HTTP::Post.new(uri_for(action))
+        request = Net::HTTP::Post.new("#{@path_prefix}/#{action}")
         request.body = options.to_json
         request.basic_auth(@username, @password) if @username && @password
         http.request(request)
@@ -92,20 +92,6 @@ module RasperClient
           hash[key] = '' if hash[key].nil?
         end
       end
-    end
-
-    def uri_for(action)
-      uri_build_class
-        .build(
-          host: @host,
-          port: @port,
-          path: "#{@path_prefix}/#{action}"
-        )
-        .to_s
-    end
-
-    def uri_build_class
-      @secure ? URI::HTTPS : URI::HTTP
     end
 
     def check_for_errors(response)
