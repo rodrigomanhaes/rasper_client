@@ -103,6 +103,17 @@ describe RasperClient do
       }
   end
 
+  it 'sends pdfa as a top-level field, outside the encoded data' do
+    client.generate(
+      name: 'programmers',
+      data: [{ name: 'Linus', software: 'Linux' }],
+      parameters: {},
+      pdfa: '1b'
+    )
+    expect(RasperClient::FakeServer.last_generate_pdfa).to eq '1b'
+    expect(RasperClient::FakeServer.last_generated_report).not_to have_key('pdfa')
+  end
+
   context 'timeout' do
     let(:timeout) { 100 }
     it 'allows pass a timeout to client' do

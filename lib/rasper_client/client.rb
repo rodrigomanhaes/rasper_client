@@ -54,7 +54,7 @@ module RasperClient
     end
 
     def symbolize_keys(options)
-      %w(name content images report data parameters).each do |s|
+      %w(name content images report data parameters pdfa).each do |s|
         symbolize_key(options, s)
       end
       if options[:images]
@@ -79,7 +79,10 @@ module RasperClient
     end
 
     def encode_data(options)
-      { data: Base64.encode64(options.to_json) }
+      pdfa = options.delete(:pdfa)
+      body = { data: Base64.encode64(options.to_json) }
+      body[:pdfa] = pdfa if pdfa
+      body
     end
 
     def empty_nil_values(hash)

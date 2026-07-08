@@ -7,7 +7,7 @@ Rack::Utils.key_space_limit = 262144 if Rack::Utils.respond_to?(:key_space_limit
 module RasperClient
   class FakeServer
     class << self
-      attr_accessor :last_added_report, :last_generated_report
+      attr_accessor :last_added_report, :last_generated_report, :last_generate_pdfa
     end
 
     def start(port, username, password)
@@ -43,8 +43,9 @@ module RasperClient
         post '/generate' do
           content_type :json
           request.body.rewind
-          FakeServer.last_generated_report =
-            JSON.parse(Base64.decode64(JSON.parse(request.body.read)['data']))
+          body = JSON.parse(request.body.read)
+          FakeServer.last_generate_pdfa = body['pdfa']
+          FakeServer.last_generated_report = JSON.parse(Base64.decode64(body['data']))
           { content: Base64.encode64(File.read(resource('dummy.pdf'))) }.to_json
         end
       end
