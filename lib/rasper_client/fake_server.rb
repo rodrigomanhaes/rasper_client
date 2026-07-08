@@ -2,7 +2,7 @@ require 'sinatra/base'
 require 'json'
 require 'base64'
 
-Rack::Utils.key_space_limit = 262144
+Rack::Utils.key_space_limit = 262144 if Rack::Utils.respond_to?(:key_space_limit=)
 
 module RasperClient
   class FakeServer
@@ -35,12 +35,14 @@ module RasperClient
 
         post '/add' do
           content_type :json
+          request.body.rewind
           FakeServer.last_added_report = JSON.parse(request.body.read)
           { success: true }.to_json
         end
 
         post '/generate' do
           content_type :json
+          request.body.rewind
           FakeServer.last_generated_report =
             JSON.parse(Base64.decode64(JSON.parse(request.body.read)['data']))
           { content: Base64.encode64(File.read(resource('dummy.pdf'))) }.to_json
